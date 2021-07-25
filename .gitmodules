@@ -1,0 +1,3 @@
+[submodule "models/mobilenetv3-ssd"]
+	path = models/mobilenetv3-ssd
+	url = https://github.com/shaoshengsong/MobileNetV3-SSD.git
