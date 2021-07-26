@@ -63,6 +63,7 @@ class PiControllerServer(object):
                 return  # closes this session
 
         # Event Loop
+        frame_total = frame_count = 0
         while True:
             message = await w.recv()
             if message.strip() == '':
@@ -80,11 +81,17 @@ class PiControllerServer(object):
                 await wprint(w, "Client %s disconnected!" % client_id)
                 return
             elif command == 'BEGININFER':
+                total_frame = int(args.pop())
+                frame_total += total_frame
                 await wprint(w, "Begin inference of model")
             elif command == 'ENDINFER':
                 await wprint(w, "End inference of model")
             elif command == 'NOMODEL':
                 await wprint(w, "Client replied model can't be loaded! check client.")
+            elif command == 'FRAME':
+                frame_count += 1
+                frame_elapsed_time = float(args.pop())
+                print("Frame [%d/%d] Took %.4fms" % (frame_count, frame_total, frame_elapsed_time))
             else:
                 await wprint(w, "Unknown command: %s, args:" % command, args)
 

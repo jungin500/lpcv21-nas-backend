@@ -1,5 +1,5 @@
 from controller.picontroller import PiControllerClient
-from secondary.infer import PiInference, generate_preprocess_fn
+from secondary.infer import PiInference, generate_preprocess_fn, Timer
 import asyncio
 import torch
 
@@ -55,8 +55,18 @@ async def main(picontrol):
 
             infer.warm()
 
-            await picontrol.send_message_async("BEGININFER")
-            infer.run()
+            await picontrol.send_message_async(" ".join(["BEGININFER", "%d" % infer.get_video_length()]))
+
+            timer = Timer()
+            timer.start()
+            while True:
+                ret, metric = picontrol.run_once()
+                if not ret:
+                    break
+                picontrol.metrics.append(metric)
+            elapsed_time = timer.end()
+            picontrol.send_message_async(" ".join(["FRAME", "%.4f" % elapsed_time]))
+
             await picontrol.send_message_async("ENDINFER")
             # do some model unloads
         elif command == 'BYE':

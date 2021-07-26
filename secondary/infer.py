@@ -81,3 +81,6 @@ class PiInference(object):
         metric = self.process_output(output)
 
         return True, metric
+
+    def get_video_length(self):
+        return self.cap.get(cv2.CAP_PROP_POS_FRAMES)
