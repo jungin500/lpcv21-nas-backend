@@ -92,7 +92,7 @@ class PiControllerServer(object):
             elif command == 'FRAME':
                 frame_count += 1
                 frame_elapsed_time = float(args.pop())
-                print("Frame [%d/%d] Took %.4fms" % (frame_count, frame_total, frame_elapsed_time))
+                await wprint(w, "Frame [%d/%d] Took %.4fms" % (frame_count, frame_total, frame_elapsed_time))
             else:
                 await wprint(w, "Unknown command: %s, args:" % command, args)
 
@@ -125,7 +125,7 @@ class PiControllerServer(object):
         return self.signal_buffer[-1]
 
     async def serve_async(self):
-        self.socket = await websockets.serve(self.onmessage, self.listen_address, self.listen_port, ping_interval=0)
+        self.socket = await websockets.serve(self.onmessage, self.listen_address, self.listen_port)
 
     async def send_message_async(self, message):
         return await self.clients[-1]['websocket'].send(message)
@@ -180,14 +180,16 @@ class PiControllerClient(object):
         return asyncio.get_event_loop().run_until_complete(self.send_binary_async(binary))
 
     async def connect_async(self):
-        self.socket = await websockets.connect(self.server_address, ping_interval=0)
+        self.socket = await websockets.connect(self.server_address)
         await self.socket.send("CONNECT %s" % uuid.uuid1())
         return True
 
     async def send_message_async(self, message):
+        await self.socket.ping()
         return await self.socket.send(message)
 
     async def send_binary_async(self, binary):
+        await self.socket.ping()
         return await self.socket.send(binary, websockets.ABNF.OPCODE_BINARY)
 
     async def recv_message_async(self):
