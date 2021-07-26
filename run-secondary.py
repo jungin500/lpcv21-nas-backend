@@ -63,7 +63,7 @@ async def main(picontrol):
                 ret, metric = infer.run_once()
                 if not ret:
                     break
-                picontrol.metrics.append(metric)
+                infer.metrics.append(metric)
             elapsed_time = timer.end()
             picontrol.send_message_async(" ".join(["FRAME", "%.4f" % elapsed_time]))
 
