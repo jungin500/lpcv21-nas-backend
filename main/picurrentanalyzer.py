@@ -12,9 +12,6 @@ class PiCurrentAnalyzer(object):
         self.dialog = None
         self.first_run = True
 
-    def __del__(self):
-        self.dialog.close()
-
     def open(self):
         # Kill previous running application
         for proc in psutil.process_iter():

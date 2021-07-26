@@ -38,7 +38,7 @@ async def main(picontrol):
 
             if model_name.lower() == 'shufflenet':
                 load_model = lambda: torch.hub.load('pytorch/vision:v0.9.0', 'shufflenet_v2_x1_0', pretrained=True).eval()
-                process_image = lambda: generate_preprocess_fn(image_size=(224, 224))
+                process_image = generate_preprocess_fn(image_size=(224, 224))
             else:
                 print("ERROR: Model %s not supported!" % model_name)
                 await asyncio.sleep(3)
@@ -54,13 +54,10 @@ async def main(picontrol):
             )
 
             infer.warm()
-            infer.run()
 
-            print("-- Begin inference and current measurement --")
             await picontrol.send_message_async("BEGININFER")
-            await asyncio.sleep(3)
+            infer.run()
             await picontrol.send_message_async("ENDINFER")
-            print("-- End of inference and current measurement --")
             # do some model unloads
         elif command == 'BYE':
             try:

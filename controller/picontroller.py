@@ -109,7 +109,7 @@ class PiControllerServer(object):
         asyncio.get_event_loop().run_until_complete(self.wait_until_client_connects_async())
 
     def wait_until_signals(self, signal):
-        asyncio.get_event_loop().run_until_complete(self.wait_until_signals_async(signal))
+        return asyncio.get_event_loop().run_until_complete(self.wait_until_signals_async(signal))
 
     def get_last_signal(self):
         if len(self.signal_buffer) == 0:
@@ -141,7 +141,8 @@ class PiControllerServer(object):
 
             for signal in signals:
                 if self.signal_buffer[-1] == signal:
-                    return
+                    value = self.signal_buffer.pop()
+                    return value
 
 
 

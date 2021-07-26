@@ -32,7 +32,7 @@ def main():
 
     timer = Timer()
 
-    model_list = ['mb3-ssd-lite', '<some-other-models>']
+    model_list = ['shufflenet']
     picontrol.send_message("SUMMARY %s" % ':'.join(model_list))
 
     for model_name in model_list:
@@ -40,8 +40,7 @@ def main():
         timer.start()
         begin_date = datetime.now().strftime("%Y%m%d%H%M%S")
         picontrol.send_message("LOADMODEL %s" % model_name)
-        picontrol.wait_until_signals("BEGININFER|NOMODEL")
-        if picontrol.poplast() == 'NOMODEL':
+        if picontrol.wait_until_signals("BEGININFER|NOMODEL") == 'NOMODEL':
             continue
 
         analyzer.begin()
@@ -77,6 +76,9 @@ def main():
             watts = data['Vbus'] * data['Power']
             power_metric = watts.mean()
 
+            print("Power Metric: %.4f" % power_metric)
+
+    print("Analyzer done.")
     analyzer.close()
     picontrol.bye()
 
