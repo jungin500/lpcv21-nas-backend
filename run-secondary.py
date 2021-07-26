@@ -60,7 +60,7 @@ async def main(picontrol):
             timer = Timer()
             timer.start()
             while True:
-                ret, metric = picontrol.run_once()
+                ret, metric = infer.run_once()
                 if not ret:
                     break
                 picontrol.metrics.append(metric)
