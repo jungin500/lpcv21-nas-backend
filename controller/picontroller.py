@@ -85,7 +85,8 @@ class PiControllerServer(object):
                 frame_total += total_frame
                 await wprint(w, "Begin inference of model")
             elif command == 'ENDINFER':
-                await wprint(w, "End inference of model")
+                frame_elapsed_time = float(args.pop())
+                await wprint(w, "End inference of model, time: %.4f" % frame_elapsed_time)
             elif command == 'NOMODEL':
                 await wprint(w, "Client replied model can't be loaded! check client.")
             elif command == 'FRAME':

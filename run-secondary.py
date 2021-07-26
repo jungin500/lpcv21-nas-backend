@@ -60,14 +60,15 @@ async def main(picontrol):
             timer = Timer()
             timer.start()
             while True:
+                timer.start(key='single')
                 ret, metric = infer.run_once()
                 if not ret:
                     break
                 infer.metrics.append(metric)
-                picontrol.send_message_async(" ".join(["FRAME", "%.4f" % elapsed_time]))
-            elapsed_time = timer.end()
+                picontrol.send_message_async(" ".join(["FRAME", "%.4f" % timer.end(key='single')]))
+            total_elapsed_time = timer.end()
 
-            await picontrol.send_message_async("ENDINFER")
+            await picontrol.send_message_async(" ".join(["ENDINFER", "%.4f" % total_elapsed_time]))
             # do some model unloads
         elif command == 'BYE':
             try:
