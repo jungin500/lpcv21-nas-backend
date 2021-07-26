@@ -29,16 +29,26 @@ async def main(picontrol):
             model_names = ' '.join(args).split(':')
             print("-- Model summary:", model_names, "--")
         elif command == 'LOADMODEL':
-            model_name = ' '.join(args)
+            model_name = ' '.join(args).lower().strip()
 
             # def load_model():
             #     model = torch.hub.load('pytorch/vision:v0.9.0', 'shufflenet_v2_x1_0', pretrained=True)
             #     model.eval()
             #     return
 
-            if model_name.lower() == 'shufflenet':
+            if model_name == 'shufflenet':
                 load_model = lambda: torch.hub.load('pytorch/vision:v0.9.0', 'shufflenet_v2_x1_0', pretrained=True).eval()
                 process_image = generate_preprocess_fn(image_size=(224, 224))
+            elif model_name == 'mb3-ssd-lite':
+                from models.mb3_ssd.vision.ssd.mobilenet_v3_ssd_lite \
+                    import create_mobilenetv3_ssd_lite, create_mobilenetv3_ssd_lite_predictor
+
+                load_model = lambda: create_mobilenetv3_ssd_lite_predictor(
+                    create_mobilenetv3_ssd_lite(3, is_test=True),
+                    nms_method='hard', device='cpu'
+                ).predict  # return a visible function
+
+                process_image = lambda image: image
             else:
                 print("ERROR: Model %s not supported!" % model_name)
                 await asyncio.sleep(3)
@@ -65,7 +75,7 @@ async def main(picontrol):
                 if not ret:
                     break
                 infer.metrics.append(metric)
-                await picontrol.send_message_async(" ".join(["FRAME", "%.4f" % timer.end(key='single')]))
+                await picontrol.send_message_async(" ".join(["FRAME", "%.4f" % (timer.end(key='single') * 1000, )]))
             total_elapsed_time = timer.end()
 
             await picontrol.send_message_async(" ".join(["ENDINFER", "%.4f" % total_elapsed_time]))

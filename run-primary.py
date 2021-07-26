@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 from controller.picontroller import PiControllerServer
 from main.picurrentanalyzer import PiCurrentAnalyzer
 from controller.util import Timer
@@ -63,20 +65,28 @@ def main():
         csv_list = glob(os.path.join(".", "csvout", "*.csv"))
         for i, filename in enumerate(csv_list):
             # 파일을 먼저 읽고 처리한다.
-            data = pd.read_csv(filename, skiprows=[0]).rename(columns={
-                'Vbus(V)': 'Vbus',
-                'Ibus(A)': 'Ibus',
-                'Power(W)': 'Power',
-                'Vd+(V)': 'Vdp',
-                'Vd-(V)': 'Vdm',
-                'energy(Wh)': 'Wh',
-                'temperature(��)': 'temp'
+            # Ensure there's no non-latin character in file!
+            data = pd.read_csv(filename, encoding='latin1', skiprows=[0]).rename(columns={
+                'Vbus(V)': 'vbus',
+                'Ibus(A)': 'ibus',
+                'Power(W)': 'power',
+                'Vd+(V)': 'vdp',
+                'Vd-(V)': 'vdm',
+                'energy(Wh)': 'wh',
+                'temperature(¡É)': 'temp'
             }).interpolate()
 
-            watts = data['Vbus'] * data['Power']
+            watts = data['vbus'] * data['power']
             power_metric = watts.mean()
 
             print("Power Metric: %.4f" % power_metric)
+
+            target_filename = 'csvprocessed/%s-%s-frame%dms-total%dsec-item%02d.csv' % (
+                datetime.now().strftime("%Y%m%d"), model_name,
+                elapsed_time / picontrol.frame_total * 1000, elapsed_time, i)
+
+            print("Moving %s -> %s" % (filename, target_filename))
+            os.rename(filename, target_filename)
 
     print("Analyzer done.")
     analyzer.close()
