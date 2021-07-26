@@ -125,7 +125,7 @@ class PiControllerServer(object):
         return self.signal_buffer[-1]
 
     async def serve_async(self):
-        self.socket = await websockets.serve(self.onmessage, self.listen_address, self.listen_port)
+        self.socket = await websockets.serve(self.onmessage, self.listen_address, self.listen_port, ping_interval=0)
 
     async def send_message_async(self, message):
         return await self.clients[-1]['websocket'].send(message)
@@ -180,7 +180,7 @@ class PiControllerClient(object):
         return asyncio.get_event_loop().run_until_complete(self.send_binary_async(binary))
 
     async def connect_async(self):
-        self.socket = await websockets.connect(self.server_address)
+        self.socket = await websockets.connect(self.server_address, ping_interval=0)
         await self.socket.send("CONNECT %s" % uuid.uuid1())
         return True
 
