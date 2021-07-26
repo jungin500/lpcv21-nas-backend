@@ -65,7 +65,7 @@ async def main(picontrol):
                 if not ret:
                     break
                 infer.metrics.append(metric)
-                picontrol.send_message_async(" ".join(["FRAME", "%.4f" % timer.end(key='single')]))
+                await picontrol.send_message_async(" ".join(["FRAME", "%.4f" % timer.end(key='single')]))
             total_elapsed_time = timer.end()
 
             await picontrol.send_message_async(" ".join(["ENDINFER", "%.4f" % total_elapsed_time]))
