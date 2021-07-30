@@ -1,3 +1,8 @@
 [submodule "models/mb3_ssd"]
 	path = models/mb3_ssd
-	url = https://github.com/shaoshengsong/MobileNetV3-SSD.git
+	url = git@github.com:jungin500/MobileNetV3-SSD.git
+	branch = main
+[submodule "models/efficientdet"]
+	path = models/efficientdet
+	url = git@github.com:jungin500/Yet-Another-EfficientDet-Pytorch.git
+	branch = main

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/models/efficientdet" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/models/mb3_ssd" vcs="Git" />
   </component>
 </project>

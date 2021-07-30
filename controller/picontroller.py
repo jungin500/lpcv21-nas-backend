@@ -2,6 +2,7 @@ import websockets
 import asyncio
 import uuid
 import io
+import base64
 
 
 async def wprint(websocket, *args, **kwargs):
@@ -50,6 +51,7 @@ class PiControllerServer(object):
         self = PiControllerServer.Instance
         while True:
             message = await w.recv()
+
             if message.strip() == '':
                 continue
             elif message.upper().startswith("CONNECT"):
@@ -68,7 +70,12 @@ class PiControllerServer(object):
         # Event Loop
         self.frame_total = self.frame_count = 0
         while True:
-            message = await w.recv()
+            try:
+                message = await w.recv()
+            except websockets.exceptions.ConnectionClosedError:
+                print("ERROR: Client connection closed!")
+                exit(-1)
+
             if message.strip() == '':
                 continue
 
@@ -113,8 +120,8 @@ class PiControllerServer(object):
     def send_message(self, message):
         return asyncio.get_event_loop().run_until_complete(self.send_message_async(message))
 
-    def send_binary(self, binary):
-        return asyncio.get_event_loop().run_until_complete(self.send_binary_async(binary))
+    def send_binary(self, filepath):
+        return asyncio.get_event_loop().run_until_complete(self.send_binary_async(filepath))
 
     def wait_until_client_connects(self):
         asyncio.get_event_loop().run_until_complete(self.wait_until_client_connects_async())
@@ -133,8 +140,11 @@ class PiControllerServer(object):
     async def send_message_async(self, message):
         return await self.clients[-1]['websocket'].send(message)
 
-    async def send_binary_async(self, binary):
-        return await self.clients[-1]['websocket'].send(binary, websockets.ABNF.OPCODE_BINARY)
+    async def send_binary_async(self, filepath):
+        with open(filepath, 'rb') as f:
+            data = f.read()
+            binary_base64 = base64.b64encode(data).decode('utf-8')
+            return await self.clients[-1]['websocket'].send(" ".join("BINARY", binary_base64))
 
     async def wait_until_client_connects_async(self):
         while True:
@@ -168,6 +178,11 @@ class PiControllerClient(object):
         Jung-In An <ji5489@gmail.com>
         CVMIPLab, Kangwon National University
     """
+
+    @staticmethod
+    async def onmessage(w, path):
+        # Implemented on main function
+        pass
 
     def __init__(self, server_address: str):
         self.server_address = server_address

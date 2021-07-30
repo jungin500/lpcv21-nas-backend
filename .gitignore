@@ -293,3 +293,4 @@ $RECYCLE.BIN/
 
 # Ignore csv output files
 csvout/
+csvprocessed/
