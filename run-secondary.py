@@ -9,14 +9,6 @@ import base64
 import os
 import sys
 
-sys.path.append(os.path.join(os.getcwd(), 'models', 'mb3_ssd'))
-from models.mb3_ssd.vision.ssd.mobilenet_v3_ssd_lite import create_mobilenetv3_ssd_lite, create_mobilenetv3_ssd_lite_predictor
-
-sys.path.append(os.path.join(os.getcwd(), 'models', 'efficientdet'))
-from models.efficientdet.efficientdet.utils import BBoxTransform, ClipBoxes
-from models.efficientdet.utils.utils import preprocess, invert_affine, postprocess, STANDARD_COLORS, standard_to_bgr, get_index_label, plot_one_box
-from models.efficientdet.backbone import EfficientDetBackbone
-
 async def main(picontrol):
     """ Raspberry Pi NAS(Network Architecture Search) backend implementation
 
@@ -64,6 +56,9 @@ async def main(picontrol):
                 load_model = lambda: torch.hub.load('pytorch/vision:v0.9.0', 'shufflenet_v2_x1_0', pretrained=True).eval()
                 process_image = generate_preprocess_fn(image_size=(224, 224))
             elif model_name == 'mb3-small-ssd-lite-1.0':
+                sys.path.append(os.path.join(os.getcwd(), 'models', 'mb3_ssd'))
+                from models.mb3_ssd.vision.ssd.mobilenet_v3_ssd_lite import create_mobilenetv3_ssd_lite, create_mobilenetv3_ssd_lite_predictor
+                
                 load_model = lambda: create_mobilenetv3_ssd_lite_predictor(
                     create_mobilenetv3_ssd_lite(num_classes=3, width_mult=1.0, is_test=True),
                     nms_method='hard', device='cpu'
@@ -71,19 +66,19 @@ async def main(picontrol):
 
                 process_image = lambda image: image
             elif model_name == 'efficientdet':
+                sys.path.append(os.path.join(os.getcwd(), 'models', 'efficientdet'))
+                from models.efficientdet.efficientdet.utils import BBoxTransform, ClipBoxes
+                from models.efficientdet.utils.utils import STANDARD_COLORS, standard_to_bgr, aspectaware_resize_padding
+                from models.efficientdet.backbone import EfficientDetBackbone
+
+                import numpy as np
+
                 def load_model():
                     compound_coef = 0
-                    force_input_size = None  # set None to use default size
-                    img_path = 'test/img.png'
 
                     # replace this part with your project's anchor config
                     anchor_ratios = [(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)]
                     anchor_scales = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]
-
-                    threshold = 0.2
-                    iou_threshold = 0.2
-
-                    use_float16 = False
 
                     obj_list = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
                                 'traffic light',
@@ -104,24 +99,28 @@ async def main(picontrol):
                                 'refrigerator', '', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier',
                                 'toothbrush']
 
-                    color_list = standard_to_bgr(STANDARD_COLORS)
-                    # tf bilinear interpolation is different from any other's, just make do
-                    input_sizes = [512, 640, 768, 896, 1024, 1280, 1280, 1536, 1536]
-                    input_size = input_sizes[compound_coef] if force_input_size is None else force_input_size
-                    ori_imgs, framed_imgs, framed_metas = preprocess(img_path, max_size=input_size)
-
-                    x = torch.stack([torch.from_numpy(fi) for fi in framed_imgs], 0)
-                    x = x.to(torch.float32 if not use_float16 else torch.float16).permute(0, 3, 1, 2)
-
                     model = EfficientDetBackbone(compound_coef=compound_coef, num_classes=len(obj_list),
                                                  ratios=anchor_ratios, scales=anchor_scales)
-                    model.load_state_dict(torch.load(f'weights/efficientdet-d{compound_coef}.pth', map_location='cpu'))
+                    model.load_state_dict(torch.load(f'models/efficientdet/weights/efficientdet-d{compound_coef}.pth', map_location='cpu'))
                     model.requires_grad_(False)
                     model.eval()
 
                     return model
 
-                process_image = lambda image: cv2.resize(image, (512, 512))
+                def process_image(image):
+                    max_size = 512
+                    mean = (0.406, 0.456, 0.485)
+                    std = (0.225, 0.224, 0.229)
+
+                    # image = np.expand_dims(image, 0)
+
+                    normalized_imgs = np.array([(img[..., ::-1] / 255 - mean) / std for img in image])
+                    framed_imgs = aspectaware_resize_padding(normalized_imgs, max_size, max_size, means=None)[0]
+                    framed_imgs = np.expand_dims(framed_imgs, 0)
+                    x = torch.from_numpy(framed_imgs).to(torch.float32).permute(0, 3, 1, 2)
+
+                    return x
+
             else:
                 print("ERROR: Model %s not supported!" % model_name)
                 await asyncio.sleep(3)
@@ -140,8 +139,8 @@ async def main(picontrol):
 
             await picontrol.send_message_async(" ".join(["BEGININFER", "%d" % infer.get_video_length()]))
 
-            if short_infer:
-                run_frames = 50
+            # if short_infer:
+            #     run_frames = 50
 
             timer = Timer()
             timer.start()
@@ -166,7 +165,17 @@ async def main(picontrol):
 if __name__ == '__main__':
     print("== PiControlClient v1.1 by LimeOrangePie ==")
     picontrol = PiControllerClient('ws://172.24.90.200:12700')
-    picontrol.connect()
+    while True:
+        try:
+            print("Trying to connect to server ... ", end='', flush=True)
+            picontrol.connect()
+            print("Connection success")
+            break
+        except ConnectionRefusedError:
+            print("Connection failed")
+
+    print("Disabling pytorch CUDA ext")
+    torch.cuda.is_available = lambda: False
 
     asyncio.get_event_loop().run_until_complete(main(picontrol))
     exit(0)

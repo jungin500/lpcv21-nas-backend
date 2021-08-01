@@ -31,7 +31,7 @@ def main():
 
     timer = Timer()
 
-    model_list = ['mb3-small-ssd-lite-1.0']
+    model_list = ['efficientdet', 'mb3-small-ssd-lite-1.0']
     picontrol.send_message("SUMMARY %s" % ':'.join(model_list))
 
     for model_name in model_list:
@@ -39,7 +39,7 @@ def main():
         timer.start()
         begin_date = datetime.now().strftime("%Y%m%d%H%M%S")
         # picontrol.send_message("LOADMODEL %s" % model_name)
-        picontrol.send_message("LOADMODEL SHORT_%s" % model_name)
+        picontrol.send_message("LOADMODEL %s" % model_name)
         if picontrol.wait_until_signals("BEGININFER|NOMODEL") == 'NOMODEL':
             continue
 

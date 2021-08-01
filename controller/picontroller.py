@@ -12,7 +12,6 @@ async def wprint(websocket, *args, **kwargs):
     print(*args, file=output, end='', **kwargs)
     contents = output.getvalue()
     output.close()
-    await websocket.ping()
     await websocket.send(contents)
 
 
@@ -203,11 +202,9 @@ class PiControllerClient(object):
         return True
 
     async def send_message_async(self, message):
-        await self.socket.ping()
         return await self.socket.send(message)
 
     async def send_binary_async(self, binary):
-        await self.socket.ping()
         return await self.socket.send(binary, websockets.ABNF.OPCODE_BINARY)
 
     async def recv_message_async(self):

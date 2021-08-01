@@ -49,14 +49,21 @@ class PiInference(object):
         self.metrics = []
 
     def __del__(self):
-        self.cap.release()
-        del self.model
+        try:
+            self.cap.release()
+            del self.model
+        except AttributeError:
+            pass
 
     def warm(self):
+        print("Warming up ... ", end='', flush=True)
         for i in range(5):
             ret, metric = self.run_once()
             if not ret:
                 break
+            print("%d " % i, end='', flush=True)
+        print("Done. rewinding video track ...")
+
         # go to first frame of video file
         self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
