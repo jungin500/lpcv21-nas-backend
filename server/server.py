@@ -13,7 +13,7 @@ from analyzer import PiCurrentAnalyzer
 from flask import Flask
 from flask_restful import Resource, reqparse, Api
 
-analyzer = PiCurrentAnalyzer()
+analyzer = PiCurrentAnalyzer(executable_path='./bin/Power-Z.exe')
 
 class PmBeginApi(Resource):
     def get(self):
