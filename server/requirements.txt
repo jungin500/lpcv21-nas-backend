@@ -1,0 +1,5 @@
+flask-restful
+pywinauto
+pandas
+numpy
+psutil
