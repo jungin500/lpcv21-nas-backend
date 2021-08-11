@@ -6,8 +6,16 @@ from torchinfo import summary
 import pandas as pd
 
 
+# Changing result metric key will also have responsible
+# to change MetricResultDict (TODO: fix this!)
 MetricResultDict = [
-
+    'params_mega',
+    'input_size_mb',
+    'param_size_mb',
+    'memory_mb',
+    'madds',
+    'flops_mega',
+    'memrw_mb'
 ]
 
 
@@ -100,6 +108,8 @@ def get_model_metrics(model: torch.nn.Module, input_size=(1, 3, 224, 224)):
 
     del model_statistics, ms._model,  ms, collected_nodes
 
+    # Changing result metric key will also have responsible
+    # to change MetricResultDict (TODO: fix this!)
     return {
         'params_mega': params_mega,
         'input_size_mb': input_size_mb,
