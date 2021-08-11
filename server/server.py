@@ -41,6 +41,7 @@ class PmEndApi(Resource):
 
             analyzer.end(title=args['title'])
             total_energy_consumption_mwh = analyzer.postprocess(model_name, elapsed_time_sec, total_frames)
+            print("Done")
 
             return {'energy_mwh': total_energy_consumption_mwh}
         except Exception as e:

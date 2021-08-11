@@ -19,13 +19,13 @@ class MeasurementRequest:
     def end(self, model_name, elapsed_time_sec, total_frames):
         url_base = self.server_url + self.api['end']
         url_query = '&'.join([
-            'model_name=%s' % model_name,
-            'elapsed_time_sec=%d' % elapsed_time_sec,
-            'total_frames=%d' % total_frames
+            'modelname=%s' % model_name,
+            'elapsedtime=%d' % elapsed_time_sec,
+            'totalframes=%d' % total_frames
         ])
         query = parse.parse_qs(url_query)
         url_query = parse.urlencode(query, doseq=True)
-        response = requests.get(url_base + '&' + url_query)
+        response = requests.get(url_base + '?' + url_query)
         data = response.json()
         if 'energy_mwh' not in data:
             print("Error: ", data)
