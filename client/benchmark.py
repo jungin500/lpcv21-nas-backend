@@ -43,29 +43,30 @@ if __name__ == '__main__':
             del input_feature, output
         print("Done")
     
-        items = 20
+        total_frames = 20
         rq.start(model_name=sys.argv[1])
     
         start_time = time.time()
         print("Inference remaining ...", end=' ', flush=True)
-        for i in range(items, 0, -1):
+        for i in range(total_frames, 0, -1):
             print(str(i), end=' ', flush=True)
             input_feature = torch.zeros(input_shape)
             output = t_model(input_feature)
             del input_feature, output
         print()
         end_time = time.time()
-        print('Inspecting model with %d items took %.0fms' % (items, (end_time - start_time) * 1000.0))
-        total_energy_consumption_mwh = rq.end(model_name=sys.argv[1], elapsed_time_sec=int(end_time - start_time), total_frames=items)
+        print('Inspecting model with %d items took %.0fms' % (total_frames, (end_time - start_time) * 1000.0))
+        total_energy_consumption_mwh = rq.end(model_name=sys.argv[1], elapsed_time_sec=int(end_time - start_time), total_frames=total_frames)
 
     metrics = get_model_metrics(t_model, input_shape)
     print("Metric:", metrics)
 
-    print("==== Cut below (InputSizeCHW~OutputSize~ ... ~ParamSize#MB~EnergymWh) ====\n")
+    print("==== Cut below (InputTotalFrames, InputSizeCHW, ..., ParamSize#MB, EnergymWh) ====\n")
+    print(total_frames)
     print(str(input_shape))
     print(str(output_shape))
-    print("%d" % ((end_time - start_time) * 1000.0 / items, ))
-    print("%.2f" % (1000 / ((end_time - start_time) * 1000.0 / items), ))
+    print("%d" % ((end_time - start_time) * 1000.0 / total_frames, ))
+    print("%.2f" % (1000 / ((end_time - start_time) * 1000.0 / total_frames), ))
     print("%.2f" % (metrics['params_mega']))
     print("%.2f" % (metrics['input_size_mb']))
     print("%.2f" % (metrics['param_size_mb']))
