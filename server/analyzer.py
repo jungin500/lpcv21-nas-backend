@@ -45,6 +45,7 @@ class PiCurrentAnalyzer(object):
         self.dialog.close()
         self.app = None
         self.dialog = None
+        self.first_run = True
 
     def begin(self, title=None):
         if title is not None:
