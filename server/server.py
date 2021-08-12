@@ -23,29 +23,27 @@ class PmBeginApi(Resource):
             args = parser.parse_args()
 
             analyzer.begin(title=args['title'])
+            return {'result': True}
         except Exception as e:
             return {'error': str(e)}
 
 class PmEndApi(Resource):
     def get(self):
-        try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('modelname', type=str)
-            parser.add_argument('elapsedtime', type=str)
-            parser.add_argument('totalframes', type=str)
-            args = parser.parse_args()
+        parser = reqparse.RequestParser()
+        parser.add_argument('modelname', type=str)
+        parser.add_argument('elapsedtime', type=str)
+        parser.add_argument('totalframes', type=str)
+        args = parser.parse_args()
 
-            model_name = args['modelname']
-            elapsed_time_sec = int(args['elapsedtime'])
-            total_frames = int(args['totalframes'])
+        model_name = args['modelname']
+        elapsed_time_sec = int(args['elapsedtime'])
+        total_frames = int(args['totalframes'])
 
-            analyzer.end(title=args['title'])
-            total_energy_consumption_mwh = analyzer.postprocess(model_name, elapsed_time_sec, total_frames)
-            print("Done")
+        analyzer.end(title=args['modelname'])
+        total_energy_consumption_mwh = analyzer.postprocess(model_name, elapsed_time_sec, total_frames)
+        print("Done")
 
-            return {'energy_mwh': total_energy_consumption_mwh}
-        except Exception as e:
-            return {'error': str(e)}
+        return {'energy_mwh': total_energy_consumption_mwh}
 
 class HeartbeatApi(Resource):
     def get(self):

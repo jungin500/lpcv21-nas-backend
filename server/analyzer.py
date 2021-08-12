@@ -80,6 +80,7 @@ class PiCurrentAnalyzer(object):
                 setting_dialog['Edit0'].set_edit_text(self.save_dir_path)
                 setting_dialog['Edit2'].click()
                 setting_dialog['Edit2'].set_edit_text(title)
+                setting_dialog['Edit0'].type_keys('{ENTER}')
 
             # Save csv file
             self.dialog['導出數據 *.csv'].click()

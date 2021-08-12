@@ -27,8 +27,4 @@ class MeasurementRequest:
         url_query = parse.urlencode(query, doseq=True)
         response = requests.get(url_base + '?' + url_query)
         data = response.json()
-        if 'energy_mwh' not in data:
-            print("Error: ", data)
-            return data
-            
         return data['energy_mwh']
