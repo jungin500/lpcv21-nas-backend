@@ -24,15 +24,7 @@ class PiCurrentAnalyzer(object):
             os.makedirs(self.preprocessed_save_dir_path, exist_ok=True)
 
     def open(self):
-        if self.dialog is not None:
-            self.close()
-
-        # Kill previous running application
-        for proc in psutil.process_iter():
-            # check whether the process name matches
-            if proc.name() == re.split(r'\\|/', self.executable_path).pop():
-                print("Killing previous running analyzer %d ..." % proc.pid)
-                proc.kill()
+        self.close()
 
         try:
             self.app = Application(backend='win32', allow_magic_lookup=False).start(self.executable_path)
@@ -42,10 +34,19 @@ class PiCurrentAnalyzer(object):
         self.dialog.wait('visible')
 
     def close(self):
-        self.dialog.close()
+        if self.dialog is not None:
+            self.dialog.close()
+            
         self.app = None
         self.dialog = None
         self.first_run = True
+
+        # Kill previous running application
+        for proc in psutil.process_iter():
+            # check whether the process name matches
+            if proc.name() == re.split(r'\\|/', self.executable_path).pop():
+                print("Killing previous running analyzer %d ..." % proc.pid)
+                proc.kill()
 
     def begin(self, title=None):
         if title is not None:
