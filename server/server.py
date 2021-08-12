@@ -18,7 +18,12 @@ analyzer = PiCurrentAnalyzer(executable_path='./bin/Power-Z.exe')
 class PmReadyApi(Resource):
     def get(self):
         try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('modelname', type=str)
+            args = parser.parse_args()
+
             analyzer.open()
+            analyzer.set_title(title=args['modelname'])
             return {'result': True}
         except Exception as e:
             return {'error': str(e)}
@@ -26,11 +31,7 @@ class PmReadyApi(Resource):
 class PmBeginApi(Resource):
     def get(self):
         try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('modelname', type=str)
-            args = parser.parse_args()
-
-            analyzer.begin(title=args['modelname'])
+            analyzer.begin()
             return {'result': True}
         except Exception as e:
             return {'error': str(e)}
@@ -47,7 +48,7 @@ class PmEndApi(Resource):
         elapsed_time_sec = int(args['elapsedtime'])
         total_frames = int(args['totalframes'])
 
-        analyzer.end(title=args['modelname'])
+        analyzer.end()
         total_energy_consumption_mwh = analyzer.postprocess(model_name, elapsed_time_sec, total_frames)
         print("Done")
 

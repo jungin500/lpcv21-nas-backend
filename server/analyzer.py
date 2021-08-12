@@ -33,6 +33,18 @@ class PiCurrentAnalyzer(object):
         self.dialog = self.app['ChargerLAB POWER-Z Standard Edition']
         self.dialog.wait('visible')
 
+    def set_title(self, title=None):
+        if title is None or title == '':
+            return
+            
+        self.dialog['App Setting'].click()
+        setting_dialog = self.app['Setting']
+        setting_dialog['Edit0'].click()  # Notify window change of test
+        setting_dialog['Edit0'].set_edit_text(self.save_dir_path)
+        setting_dialog['Edit2'].click()
+        setting_dialog['Edit2'].set_edit_text(title)
+        setting_dialog['Edit0'].type_keys('{ENTER}')
+
     def close(self):
         if self.dialog is not None:
             self.dialog.close()
@@ -49,15 +61,7 @@ class PiCurrentAnalyzer(object):
                 proc.kill()
 
     def begin(self, title=None):
-        if title is not None:
-            self.dialog['App Setting'].click()
-            setting_dialog = self.app['Setting']
-            setting_dialog['Edit0'].click()  # Notify window change of test
-            setting_dialog['Edit0'].set_edit_text(self.save_dir_path)
-            setting_dialog['Edit2'].click()
-            setting_dialog['Edit2'].set_edit_text(title)
-            setting_dialog['Edit0'].type_keys('{ENTER}')
-
+        self.set_title(title)
         self.dialog["High refresh rate"].check()
 
         if self.first_run:
@@ -80,14 +84,7 @@ class PiCurrentAnalyzer(object):
             self.dialog['Stop'].click()
 
             # Set csvout as output filename
-            if title is not None:
-                self.dialog['App Setting'].click()
-                setting_dialog = self.app['Setting']
-                setting_dialog['Edit0'].click()  # Notify window change of test
-                setting_dialog['Edit0'].set_edit_text(self.save_dir_path)
-                setting_dialog['Edit2'].click()
-                setting_dialog['Edit2'].set_edit_text(title)
-                setting_dialog['Edit0'].type_keys('{ENTER}')
+            self.set_title(title)
 
             # Save csv file
             self.dialog['導出數據 *.csv'].click()

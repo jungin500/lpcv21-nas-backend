@@ -14,17 +14,19 @@ class MeasurementRequest:
     def hello(self):
         return requests.get(self.server_url + self.api['hello'])
 
-    def ready(self):
-        return requests.get(self.server_url + self.api['ready'])
-
-    def start(self, model_name):
-        url_base = self.server_url + self.api['start']
+    def ready(self, model_name):
+        url_base = self.server_url + self.api['ready']
         url_query = '&'.join([
             'modelname=%s' % model_name
         ])
         query = parse.parse_qs(url_query)
         url_query = parse.urlencode(query, doseq=True)
         response = requests.get(url_base + '?' + url_query)
+        data = response.json()
+        return data
+
+    def start(self):
+        response = requests.get(self.server_url + self.api['start'])
         data = response.json()
         return data
 
