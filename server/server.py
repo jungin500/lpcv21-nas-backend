@@ -15,6 +15,14 @@ from flask_restful import Resource, reqparse, Api
 
 analyzer = PiCurrentAnalyzer(executable_path='./bin/Power-Z.exe')
 
+class PmReadyApi(Resource):
+    def get(self):
+        try:
+            analyzer.open()
+            return {'result': True}
+        except Exception as e:
+            return {'error': str(e)}
+
 class PmBeginApi(Resource):
     def get(self):
         try:
@@ -55,10 +63,10 @@ class HeartbeatApi(Resource):
 app = Flask(__name__)
 api = Api(app)
 
+api.add_resource(PmReadyApi, '/meter/ready')
 api.add_resource(PmBeginApi, '/meter/start')
 api.add_resource(PmEndApi, '/meter/end')
 api.add_resource(HeartbeatApi, '/hello')
 
 if __name__ == '__main__':
-    analyzer.open()
     app.run(host='0.0.0.0', port=48090)

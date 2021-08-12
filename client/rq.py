@@ -5,6 +5,7 @@ class MeasurementRequest:
     def __init__(self):
         self.server_url = 'http://210.115.46.198:48090'
         self.api = {
+            'ready': '/meter/ready',
             'start': '/meter/start',
             'end': '/meter/end',
             'hello': '/hello'
@@ -12,6 +13,9 @@ class MeasurementRequest:
 
     def hello(self):
         return requests.get(self.server_url + self.api['hello'])
+
+    def start(self, ready):
+        return requests.get(self.server_url + self.api['ready'])
 
     def start(self, model_name):
         return requests.get(self.server_url + self.api['start'])

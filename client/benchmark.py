@@ -30,6 +30,8 @@ if __name__ == '__main__':
     input_shape = [1, 3, *[int(i) for i in sys.argv[2:]]]
     
     with torch.no_grad():
+        rq.ready()
+        
         print("Warming up ...", end=' ', flush=True)
         for _ in range(3):
             input_feature = torch.zeros(input_shape)

@@ -24,6 +24,9 @@ class PiCurrentAnalyzer(object):
             os.makedirs(self.preprocessed_save_dir_path, exist_ok=True)
 
     def open(self):
+        if self.dialog is not None:
+            self.close()
+
         # Kill previous running application
         for proc in psutil.process_iter():
             # check whether the process name matches
@@ -40,6 +43,8 @@ class PiCurrentAnalyzer(object):
 
     def close(self):
         self.dialog.close()
+        self.app = None
+        self.dialog = None
 
     def begin(self, title=None):
         if title is not None:
