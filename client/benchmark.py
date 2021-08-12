@@ -30,7 +30,7 @@ if __name__ == '__main__':
     input_shape = [1, 3, *[int(i) for i in sys.argv[2:]]]
     
     with torch.no_grad():
-        rq.ready()
+        rq.ready(model_name=sys.argv[1])
         
         print("Warming up ...", end=' ', flush=True)
         for _ in range(3):
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         print("Done")
     
         total_frames = 20
-        rq.start(model_name=sys.argv[1])
+        rq.start()
     
         start_time = time.time()
         print("Inference remaining ...", end=' ', flush=True)
