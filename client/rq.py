@@ -14,7 +14,7 @@ class MeasurementRequest:
     def hello(self):
         return requests.get(self.server_url + self.api['hello'])
 
-    def start(self, ready):
+    def ready(self):
         return requests.get(self.server_url + self.api['ready'])
 
     def start(self, model_name):
