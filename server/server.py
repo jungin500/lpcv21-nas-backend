@@ -27,10 +27,10 @@ class PmBeginApi(Resource):
     def get(self):
         try:
             parser = reqparse.RequestParser()
-            parser.add_argument('title', type=str)
+            parser.add_argument('modelname', type=str)
             args = parser.parse_args()
 
-            analyzer.begin(title=args['title'])
+            analyzer.begin(title=args['modelname'])
             return {'result': True}
         except Exception as e:
             return {'error': str(e)}

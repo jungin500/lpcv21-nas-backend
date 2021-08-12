@@ -18,7 +18,15 @@ class MeasurementRequest:
         return requests.get(self.server_url + self.api['ready'])
 
     def start(self, model_name):
-        return requests.get(self.server_url + self.api['start'])
+        url_base = self.server_url + self.api['start']
+        url_query = '&'.join([
+            'modelname=%s' % model_name
+        ])
+        query = parse.parse_qs(url_query)
+        url_query = parse.urlencode(query, doseq=True)
+        response = requests.get(url_base + '?' + url_query)
+        data = response.json()
+        return data
 
     def end(self, model_name, elapsed_time_sec, total_frames):
         url_base = self.server_url + self.api['end']
