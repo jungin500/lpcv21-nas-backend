@@ -47,10 +47,18 @@ class PiCurrentAnalyzer(object):
 
     def close(self):
         if self.dialog is not None:
-            self.dialog.close()
+            try:
+                self.dialog.close()
+            except:
+                print("Error closing dialog")
+            self.dialog = None
+        if self.app is not None:
+            try:
+                self.app.close()
+            except:
+                print("Error closing app")
+            self.app = None
             
-        self.app = None
-        self.dialog = None
         self.first_run = True
 
         # Kill previous running application
