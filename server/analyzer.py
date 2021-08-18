@@ -93,6 +93,9 @@ class PiCurrentAnalyzer(object):
         except pywinauto.findbestmatch.MatchError:
             pass
 
+        if self.dialog is not None:
+            self.dialog.close()
+            
     def postprocess(self, model_name, elapsed_time_sec, total_frames):
         # 출력된 csv 파일에 대한 후처리를 진행하고
         # 파일을 이동한다.
