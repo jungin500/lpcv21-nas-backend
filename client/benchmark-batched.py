@@ -9,13 +9,15 @@ from inspector import get_model_metrics
 from tqdm.auto import tqdm
 import time
 from rq import MeasurementRequest
+import sys
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print("Usage: python3 {0} <model>.torchscript height width".format(sys.argv[0]))
+    if len(sys.argv) != 5:
+        print("Usage: python3 {0} <model>.torchscript height width batch_size".format(sys.argv[0]))
         sys.exit(1)
 
+    batch_size = int(sys.argv[4])
     rq = MeasurementRequest()
     try:
         rq.hello()
@@ -28,7 +30,7 @@ if __name__ == '__main__':
     end_time = time.time()
     print('Loading model took %.0fms' % ((end_time - start_time) * 1000.0, ))
 
-    input_shape = [1, 3, *[int(i) for i in sys.argv[2:]]]
+    input_shape = [batch_size, 3, *[int(i) for i in sys.argv[2:4]]]
 
     with torch.no_grad():
         rq.ready(model_name=sys.argv[1])
@@ -46,7 +48,7 @@ if __name__ == '__main__':
             del input_feature, output
         print("Done")
 
-        total_frames = 20
+        total_frames = max(1, 20 // batch_size)
         rq.start()
 
         start_time = time.time()
@@ -63,16 +65,17 @@ if __name__ == '__main__':
 
     metrics = get_model_metrics(t_model, input_shape)
     print("Metric:", metrics)
+    one_batch_taken_ms = int((end_time - start_time) * 1000.0 / total_frames)
 
     print("==== Cut below (InputTotalFrames, InputSizeCHW, ..., ParamSize#MB, EnergymWh) ====\n")
-    print(1)
+    print(batch_size)
     print(total_frames)
     print(str(input_shape))
     print(str(output_shape))
-    print("%d" % ((end_time - start_time) * 1000.0 / total_frames, ))
-    print("%.2f" % (1000 / ((end_time - start_time) * 1000.0 / total_frames), ))
-    print("%d" % ((end_time - start_time) * 1000.0 / total_frames, ))
-    print("%.2f" % (1000 / ((end_time - start_time) * 1000.0 / total_frames), ))
+    print("%d" % (one_batch_taken_ms, ))
+    print("%.2f" % (1000 / one_batch_taken_ms, ))
+    print("%d" % (one_batch_taken_ms / batch_size, ))
+    print("%.2f" % (1000 / (one_batch_taken_ms / batch_size), ))
     print("%.2f" % (metrics['params_mega']))
     print("%.2f" % (metrics['input_size_mb']))
     print("%.2f" % (metrics['param_size_mb']))
