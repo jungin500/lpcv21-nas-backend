@@ -2,8 +2,8 @@ import requests
 from urllib import parse
 
 class MeasurementRequest:
-    def __init__(self):
-        self.server_url = 'http://210.115.46.198:48090'
+    def __init__(self, server_url):
+        self.server_url = server_url
         self.api = {
             'ready': '/meter/ready',
             'start': '/meter/start',

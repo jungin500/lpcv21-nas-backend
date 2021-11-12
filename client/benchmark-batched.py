@@ -13,12 +13,12 @@ import sys
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 5:
-        print("Usage: python3 {0} <model>.torchscript height width batch_size".format(sys.argv[0]))
+    if len(sys.argv) != 6:
+        print("Usage: python3 {0} <model>.torchscript height width batch_size server_addr".format(sys.argv[0]))
         sys.exit(1)
 
     batch_size = int(sys.argv[4])
-    rq = MeasurementRequest()
+    rq = MeasurementRequest("http://%s:48090" % (sys.argv[5]))
     try:
         rq.hello()
     except:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
             del input_feature, output
         print("Done")
 
-        total_frames = max(1, 20 // batch_size)
+        total_frames = max(8, 20 // batch_size)
         rq.start()
 
         start_time = time.time()

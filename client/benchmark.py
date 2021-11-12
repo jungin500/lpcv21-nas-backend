@@ -12,11 +12,11 @@ from rq import MeasurementRequest
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print("Usage: python3 {0} <model>.torchscript height width".format(sys.argv[0]))
+    if len(sys.argv) != 5:
+        print("Usage: python3 {0} <model>.torchscript height width server_ip".format(sys.argv[0]))
         sys.exit(1)
 
-    rq = MeasurementRequest()
+    rq = MeasurementRequest("http://%s:48090" % (sys.argv[4]))
     try:
         rq.hello()
     except:
